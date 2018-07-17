@@ -1,5 +1,7 @@
 import json
 import logging
+import platform
+import time
 
 from datetime import datetime
 
@@ -8,10 +10,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction
 from django.db.models import Q
+from django.http import StreamingHttpResponse
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 
+from api_test.common.WriteExcel import Write
 from api_test.common.addTask import add
 from api_test.common.api_response import JsonResponse
 from api_test.common.common import record_dynamic, create_json, del_task_crontab
@@ -24,7 +28,8 @@ from api_test.serializers import AutomationGroupLevelFirstSerializer, Automation
     AutomationCaseApiSerializer, AutomationCaseApiListSerializer, AutomationTestTaskSerializer, \
     AutomationTestResultSerializer, ApiInfoSerializer, CorrelationDataSerializer, AutomationTestReportSerializer, \
     AutomationTestCaseDeserializer, AutomationCaseApiDeserializer, AutomationHeadDeserializer, \
-    AutomationParameterDeserializer, AutomationTestTaskDeserializer, ProjectSerializer
+    AutomationParameterDeserializer, AutomationTestTaskDeserializer, ProjectSerializer, ApiInfoDocSerializer, \
+    AutomationCaseDownloadSerializer
 
 logger = logging.getLogger(__name__)  # 这里使用 __name__ 动态搜索定义的 logger 配置，这里有一个层次关系的知识点。
 
@@ -755,7 +760,7 @@ class AddNewApi(APIView):
                 api_ids = AutomationCaseApi.objects.get(id=api_id)
                 if data["examineType"] == "json":
                     try:
-                        response = eval(data["responseData"].replace("true", "True").replace("false", "False").replace("null", None))
+                        response = eval(data["responseData"].replace("true", "True").replace("false", "False").replace("null", "None"))
                         api = "<response[JSON][%s]>" % api_id
                         create_json(api_ids, api, response)
                     except KeyError:
@@ -769,9 +774,6 @@ class AddNewApi(APIView):
                                                    type='Regular').save()
                     except KeyError:
                         pass
-                # record_dynamic(project=data["project_id"],
-                #                _type="新增", operationObject="用例接口", user=request.user.pk,
-                #                data="用例“%s”新增接口\"%s\"" % (obj.caseName, data["name"]))
                 return JsonResponse(data={"api_id": api_id}, code="999999", msg="成功！")
             return JsonResponse(code="999998", msg="失败！")
 
@@ -936,7 +938,7 @@ class UpdateApi(APIView):
                                                    tier='<response[Regular][%s]["%s"]' % (api_id.id, data["responseData"]),
                                                    type='Regular').save()
                     except KeyError as e:
-                        logging.exception(e)
+                        # logging.exception(e)
                         pass
                 record_dynamic(project=data["project_id"],
                                _type="修改", operationObject="用例接口", user=request.user.pk,
@@ -1095,10 +1097,13 @@ class AddTimeTask(APIView):
 
     def post(self, request):
         """
-        执行测试用例
+        添加测试任务
         :param request:
         :return:
         """
+        sys_name = platform.system()
+        if sys_name == "Windows" or sys_name == "Darwin":
+            return JsonResponse(code="999998", msg="该操作只能在Linux系统下进行！")
         data = JSONParser().parse(request)
         result = self.parameter_check(data)
         if result:
@@ -1341,3 +1346,37 @@ class TestReport(APIView):
                                                                 })
         else:
             return JsonResponse(code="999987", msg="用例不存在！")
+
+
+class DownLoadCase(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = ()
+
+    def get(self, request):
+        """
+        获取用例下载文档路径
+        :param request:
+        :return:
+        """
+        project_id = request.GET.get("project_id")
+        try:
+            if not project_id.isdecimal():
+                return JsonResponse(code="999996", msg="参数有误!")
+        except AttributeError:
+            return JsonResponse(code="999996", msg="参数有误！")
+        try:
+            obj = Project.objects.get(id=project_id)
+        except ObjectDoesNotExist:
+            return JsonResponse(code="999995", msg="项目不存在!")
+        pro_data = ProjectSerializer(obj)
+        if not pro_data.data["status"]:
+            return JsonResponse(code="999985", msg="该项目已禁用")
+        obi = AutomationTestCase.objects.filter(project=project_id).order_by("id")
+        data = AutomationCaseDownloadSerializer(obi, many=True).data
+        path = "./api_test/ApiDoc/%s.xlsx" % str(obj.name)
+        result = Write(path).write_case(data)
+        if result:
+            return JsonResponse(code="999999", msg="成功！", data=path)
+        else:
+            return JsonResponse(code="999998", msg="失败")
+

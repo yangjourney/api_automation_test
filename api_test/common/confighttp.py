@@ -82,14 +82,14 @@ def test_api(host_id, case_id, project_id, _id):
                                            host=host.name,
                                            status_code=http_code, examine_type=examine_type,
                                            examine_data=response_parameter_list,
-                                           _result='ERROR', code="", response_data="")
+                                           _result='ERROR', code="", response_data="关联有误！")
                             return 'fail'
                     elif interrelate_type[0] == "Regular":
                         api_id = re.findall('(?<=<response\[Regular]\[).*?(?=\])', value)
                         pattern = re.findall('(?<=\[").*?(?="])', value)
                         param_data = json.loads(serializers.serialize(
                             'json',
-                            AutomationTestResult.objects.filter(automationCaseApi=api_id[0])))[0]['fields']["responseData"]
+                            AutomationTestResult.objects.filter(automationCaseApi=api_id[0])))[-1]['fields']["responseData"]
                         param_data = re.findall(pattern[0], param_data.replace("\'", "\""))[0]
                     else:
                         record_results(_id=_id, url=url, request_type=request_type, header=header, parameter=parameter,
@@ -98,7 +98,7 @@ def test_api(host_id, case_id, project_id, _id):
                                        _result='ERROR', code="", response_data="")
                         return 'fail'
                     pattern = re.compile(r'<response\[.*]')
-                    parameter[key_] = re.sub(pattern, param_data, value)
+                    parameter[key_] = re.sub(pattern, str(param_data), value)
 
                 else:
                     parameter[key_] = value
@@ -107,7 +107,7 @@ def test_api(host_id, case_id, project_id, _id):
                 record_results(_id=_id, url=url, request_type=request_type, header=header, parameter=parameter,
                                host=host.name,
                                status_code=http_code, examine_type=examine_type, examine_data=response_parameter_list,
-                               _result='ERROR', code="", response_data="")
+                               _result='ERROR', code="", response_data="关联有误！")
                 return 'fail'
         if data["formatRaw"]:
             request_parameter_type = "raw"
@@ -144,7 +144,7 @@ def test_api(host_id, case_id, project_id, _id):
                     try:
                         param_data = eval(json.loads(serializers.serialize(
                             'json',
-                            AutomationTestResult.objects.filter(automationCaseApi=api_id[0])))[0]['fields']["responseData"])
+                            AutomationTestResult.objects.filter(automationCaseApi=api_id[0])))[-1]['fields']["responseData"])
                         for j in a:
                             param_data = param_data[j]
                     except Exception as e:
@@ -153,7 +153,7 @@ def test_api(host_id, case_id, project_id, _id):
                                        host=host.name,
                                        status_code=http_code, examine_type=examine_type,
                                        examine_data=response_parameter_list,
-                                       _result='ERROR', code="", response_data="")
+                                       _result='ERROR', code="", response_data="关联有误！")
                         return 'fail'
                 elif interrelate_type[0] == "Regular":
                     api_id = re.findall('(?<=<response\[Regular]\[).*?(?=\])', value)
@@ -170,14 +170,13 @@ def test_api(host_id, case_id, project_id, _id):
                                    _result='ERROR', code="", response_data="")
                     return 'fail'
                 pattern = re.compile(r'<response\[.*]')
-                header[key_] = re.sub(pattern, param_data, value)
-
+                header[key_] = re.sub(pattern, str(param_data), value)
             except Exception as e:
                 logging.exception(e)
                 record_results(_id=_id, url=url, request_type=request_type, header=header, parameter=parameter,
                                host=host.name,
                                status_code=http_code, examine_type=examine_type, examine_data=response_parameter_list,
-                               _result='ERROR', code="", response_data="")
+                               _result='ERROR', code="", response_data="关联有误！")
                 return 'fail'
         else:
             header[key_] = value
@@ -210,10 +209,11 @@ def test_api(host_id, case_id, project_id, _id):
             if not response_parameter_list:
                 response_parameter_list = "{}"
             try:
+                logging.info(response_parameter_list)
+                logging.info(response_data)
                 result = check_json(json.loads(response_parameter_list), response_data)
-            except Exception as e:
-                print(response_parameter_list)
-                logging.exception(e)
+            except Exception:
+                logging.info(response_parameter_list)
                 result = check_json(eval(response_parameter_list.replace('true', 'True').replace('false', 'False')), response_data)
             if result:
                 record_results(_id=_id, url=url, request_type=request_type, header=header, parameter=parameter,
@@ -268,11 +268,9 @@ def test_api(host_id, case_id, project_id, _id):
     elif examine_type == 'Regular_check':
         if int(http_code) == code:
             try:
-                print(response_parameter_list)
-                print(json.dumps(response_data))
-                print(type(json.dumps(response_data)))
+                logging.info(response_parameter_list)
                 result = re.findall(response_parameter_list, json.dumps(response_data))
-                print(result)
+                logging.info(result)
             except Exception as e:
                 logging.exception(e)
                 return "fail"
