@@ -126,7 +126,7 @@
                             <el-input :class="ParameterTyep? 'parameter-b': 'parameter-a'" type="textarea" :rows="5" placeholder="请输入内容" v-model.trim="parameterRaw"></el-input>
                         </template>
                     </el-collapse-item>
-                    <el-dialog title="更多设置" v-model="addParameterFormVisible" :close-on-click-modal="false">
+                    <el-dialog title="更多设置" :visible.sync="addParameterFormVisible" :close-on-click-modal="false">
                         <el-form :model="editForm" label-width="60px" :rules="FormRules" ref="editForm" >
                             <el-form-item label="参数名" prop="name" label-width="83px">
                                 <el-input v-model.trim="editForm.name" auto-complete="off" placeholder="请输入参数名称"></el-input>
@@ -188,7 +188,7 @@
                             </el-table-column>
                         </el-table>
                     </el-collapse-item>
-                    <el-dialog title="更多设置" v-model="addResponseFormVisible" :close-on-click-modal="false">
+                    <el-dialog title="更多设置" :visible.sync="addResponseFormVisible" :close-on-click-modal="false">
                         <el-form :model="editForm" label-width="60px" :rules="FormRules" ref="editForm" >
                             <el-form-item label="参数名" prop="name" label-width="83px">
                                 <el-input v-model.trim="editForm.name" auto-complete="off" placeholder="请输入参数名称"></el-input>
@@ -286,7 +286,8 @@
                 addResponseFormVisible: false,
                 required4:[{value: true, label: '是'},
                     {value: false, label: '否'}],
-                httpCode:[{value: '200', label: '200'},
+                httpCode:[{value: '', label: ''},
+                    {value: '200', label: '200'},
                     {value: '404', label: '404'},
                     {value: '400', label: '400'},
                     {value: '500', label: '500'},
