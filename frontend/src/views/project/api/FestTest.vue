@@ -123,7 +123,7 @@
                             </div>
                             <div v-model="form.resultHead" :class="resultShow? 'parameter-b': 'parameter-a'">{{form.resultHead}}</div>
                             <div :class="resultShow? 'parameter-a': 'parameter-b'" v-show="format && form.resultData">
-                                <pre style="border: 1px solid #e6e6e6;word-break: break-all;height:300px;overflow:auto;overflow-x:hidden">{{form.resultData}}</pre>
+                                <pre style="border: 1px solid #e6e6e6;word-break: break-all;overflow:auto;overflow-x:hidden">{{form.resultData}}</pre>
                             </div>
                             <div v-show="!form.resultData&&!form.resultHead" class="raw">暂无数据</div>
                         </el-card>
@@ -376,28 +376,11 @@
                 })
             },
             neatenFormat() {
+                let demo = document.getElementsByTagName('pre')[0];
+                console.log(demo)
+                hljs.highlightBlock(demo);
                 this.format = !this.format
             },
-            // addHead() {
-            //     let headers = {name: "", value: ""};
-            //     this.form.head.push(headers)
-            // },
-            // delHead(index) {
-            //     this.form.head.splice(index, 1);
-            //     if (this.form.head.length === 0) {
-            //         this.form.head.push({name: "", value: ""})
-            //     }
-            // },
-            // addParameter() {
-            //     let headers = {name: "", value: ""};
-            //     this.form.parameter.push(headers)
-            // },
-            // delParameter(index) {
-            //     this.form.parameter.splice(index, 1);
-            //     if (this.form.parameter.length === 0) {
-            //         this.form.parameter.push({name: "", value: ""})
-            //     }
-            // },
             addHead() {
                 let headers = {name: "", value: ""};
                 this.form.head.push(headers);
@@ -477,17 +460,25 @@
         display: none;
     }
     .selectInput {
-        position:absolute;
-        margin-left:7px;
-        padding-left:10px;
-        width: 63%;
-        height:25px;
-        left:1px;
-        top:1px;
-        border-bottom:0px;
-        border-right:0px;
-        border-left:0px;
-        border-top:0px;
+        /*position:absolute;*/
+        /*margin-left:7px;*/
+        /*padding-left:10px;*/
+        /*width: 63%;*/
+        /*height:25px;*/
+        /*left:1px;*/
+        /*top:1px;*/
+        /*border-bottom:0px;*/
+        /*border-right:0px;*/
+        /*border-left:0px;*/
+        /*border-top:0px;*/
+        position: absolute;
+        /*margin-left: 7px;*/
+        padding-left: 9px;
+        width: 180px;
+        /*border-radius:0px;*/
+        /*height: 38px;*/
+        left: 1px;
+        border-right: 0px;
     }
     .raw {
         border: 1px solid #e6e6e6;
@@ -499,5 +490,13 @@
         position: absolute;
         right: 10px;
         top: 0px;
+    }
+</style>
+<style lang="scss">
+    .selectInput{
+        input{
+            border-right: 0px;
+            border-radius: 4px 0px 0px 4px;
+        }
     }
 </style>

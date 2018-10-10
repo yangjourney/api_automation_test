@@ -551,6 +551,9 @@
                 })
             },
             neatenFormat() {
+                let demo = document.getElementsByTagName('pre')[0];
+                console.log(demo)
+                hljs.highlightBlock(demo);
                 this.format = !this.format
             },
             addHead() {
@@ -633,16 +636,13 @@
     }
     .selectInput {
         position: absolute;
-        margin-left: 7px;
-        padding-left: 10px;
-        width: 63%;
-        height: 25px;
+        /*margin-left: 7px;*/
+        padding-left: 9px;
+        width: 180px;
+        /*border-radius:0px;*/
+        /*height: 38px;*/
         left: 1px;
-        top: 1px;
-        border-bottom: 0px;
         border-right: 0px;
-        border-left: 0px;
-        border-top: 0px;
     }
     .HOST {
         position: absolute;
@@ -654,5 +654,13 @@
         margin-bottom: 10px;
         padding:15px;
         text-align: center
+    }
+</style>
+<style lang="scss">
+    .selectInput{
+        input{
+            border-right: 0px;
+            border-radius: 4px 0px 0px 4px;
+        }
     }
 </style>

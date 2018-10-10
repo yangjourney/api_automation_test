@@ -40,7 +40,7 @@
                         <el-table :data="form.head" highlight-current-row>
                             <el-table-column prop="name" label="标签" min-width="28%" sortable>
                                 <template slot-scope="scope">
-                                    <el-select placeholder="head标签" filterable v-model="scope.row.name" style="width: 100%">
+                                    <el-select placeholder="head标签" filterable v-model="scope.row.name" style="width: 90%">
                                         <el-option v-for="(item,index) in header" :key="index+''" :label="item.label" :value="item.value"></el-option>
                                     </el-select>
                                     <el-input class="selectInput" v-model.trim="scope.row.name" :value="scope.row.name" placeholder="请输入内容"></el-input>
@@ -543,15 +543,20 @@
     }
     .selectInput {
         position: absolute;
-        margin-left: 7px;
-        padding-left: 10px;
-        width: 77%;
-        height: 25px;
+        /*margin-left: 7px;*/
+        padding-left: 9px;
+        width: 180px;
+        /*border-radius:0px;*/
+        /*height: 38px;*/
         left: 1px;
-        top: 1px;
-        border-bottom: 0px;
         border-right: 0px;
-        border-left: 0px;
-        border-top: 0px;
+    }
+</style>
+<style lang="scss">
+    .selectInput{
+        input{
+            border-right: 0px;
+            border-radius: 4px 0px 0px 4px;
+        }
     }
 </style>
